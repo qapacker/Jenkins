@@ -1,0 +1,48 @@
+pipeline {
+    agent none
+
+    environment {
+        PYTHON_ENV = 'venv'
+        FLASK_APP = 'app.py'
+        GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
+        BASE_URL = "http://localhost:5000"
+        PYTHONPATH = '/var/jenkins_home/workspace/cp1'
+    }
+
+    stages {
+        stage('Preparar') {
+            agent { label 'agent-1' }
+            steps {
+                echo 'Preparando entorno'
+                sh 'rm -rf *'
+                sh "git clone $GIT_REPO ."
+                sh "python3 -m venv $PYTHON_ENV"
+                sh "bash -c 'source $PYTHON_ENV/bin/activate && pip install -r requirements.txt'"
+            }
+        }
+
+        stage('Test') {
+            agent { label 'agent-2' }
+            steps {
+                echo 'Ejecutando tests'
+                sh "bash -c 'source $PYTHON_ENV/bin/activate && PYTHONPATH=$PYTHONPATH pytest test/'"
+            }
+        }
+
+        stage('Desplegar') {
+            agent { label 'agent-3' }
+            steps {
+                echo 'Desplegando'
+                sh 'docker build -t myapp .'
+                sh 'docker run -d -p 6000:6000 myapp'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Limpieza final'
+            sh "rm -rf $PYTHON_ENV"
+        }
+    }
+}

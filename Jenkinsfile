@@ -38,7 +38,6 @@ pipeline {
             steps {
                 echo 'Desplegando la aplicación'
                 script {
-                    // Si necesitas volver a desplegar la app, asegúrate de que este paso sea necesario
                     sh 'docker build -t myapp .'
                     sh 'docker run -d -p 6000:6000 myapp'
                 }

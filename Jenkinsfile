@@ -1,22 +1,23 @@
 pipeline {
-    agent any  // Usamos cualquier agente disponible
+    agent any
 
     environment {
-        PYTHON_ENV = 'venv'  // Nombre del entorno virtual que se creará
-        FLASK_APP = 'app.py'  // Nombre de la aplicación Flask
+        PYTHON_ENV = 'venv'
+        FLASK_APP = 'app.py'
+        GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
     }
 
     stages {
         stage('Preparar') {
             steps {
                 echo 'Clonando el repositorio y preparando el entorno'
-                checkout scm  // Clona el repositorio
+                sh 'git clone $GIT_REPO .'
+
                 script {
-                    // Crear un entorno virtual y activar
+                    // Crear entorno virtual
                     sh 'python3 -m venv $PYTHON_ENV'
-                    sh '. $PYTHON_ENV/bin/activate'
-                    // Instalar dependencias desde el archivo requirements.txt
-                    sh 'pip install -r requirements.txt'
+                    // Instalar dependencias
+                    sh ". $PYTHON_ENV/bin/activate && pip install -r requirements.txt"
                 }
             }
         }
@@ -25,9 +26,7 @@ pipeline {
             steps {
                 echo 'Ejecutando pruebas con pytest'
                 script {
-                    // Activar el entorno virtual y ejecutar pytest
-                    sh '. $PYTHON_ENV/bin/activate'
-                    sh 'pytest tests/'  // Directorio de tus pruebas
+                    sh ". $PYTHON_ENV/bin/activate && pytest tests/"
                 }
             }
         }
@@ -36,8 +35,6 @@ pipeline {
             steps {
                 echo 'Desplegando la aplicación'
                 script {
-                    // Aquí puedes ejecutar el despliegue, por ejemplo, con Docker
-                    // Si tienes un Dockerfile, puedes construir y correr el contenedor
                     sh 'docker build -t myapp .'
                     sh 'docker run -d -p 5000:5000 myapp'
                 }
@@ -53,7 +50,7 @@ pipeline {
             echo 'El pipeline ha fallado'
         }
         always {
-            // Limpiar cualquier recurso, como el entorno virtual
+            echo 'Limpiando entorno virtual'
             sh 'rm -rf $PYTHON_ENV'
         }
     }

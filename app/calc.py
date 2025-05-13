@@ -1,5 +1,3 @@
-import app
-
 
 class InvalidPermissions(Exception):
     pass

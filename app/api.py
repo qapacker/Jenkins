@@ -1,7 +1,7 @@
 import http.client
 from flask import Flask
-from app import util
-from app.calc import Calculator
+import util
+from calc import Calculator
 
 CALCULATOR = Calculator()
 api_application = Flask(__name__)
@@ -53,5 +53,4 @@ def divide(op_1, op_2):
 
 # Bloque para ejecutar la aplicación
 if __name__ == "__main__":
-    api_application.run(debug=True)
-
+    api_application.run(host="0.0.0.0", port=5000, debug=True)

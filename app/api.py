@@ -44,14 +44,12 @@ def multiply(op_1, op_2):
 def divide(op_1, op_2):
     try:
         num_1, num_2 = util.convert_to_number(op_1), util.convert_to_number(op_2)
-        if num_2 == 0:
-            raise ValueError("Cannot divide by zero")
-        return ("{}".format(CALCULATOR.divide(num_1, num_2)), http.client.OK, HEADERS)
+        result = CALCULATOR.divide(num_1, num_2)
+        return ("{:.1f}".format(result), http.client.OK, HEADERS)
     except TypeError as e:
         return (str(e), http.client.BAD_REQUEST, HEADERS)
     except ValueError as e:
         return (str(e), http.client.BAD_REQUEST, HEADERS)
-
 
 # Bloque para ejecutar la aplicación
 if __name__ == "__main__":

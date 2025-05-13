@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  app:
+  jenkins-app-1:
+    container_name: jenkins-app-1
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,16 +10,17 @@ services:
       - "5000:5000"
 
   jenkins:
+    container_name: jenkins-jenkins-1
     build:
       context: ./jenkins
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
       - "50000:50000"
-    user: root  # 👈 para evitar problemas de permisos con el socket Docker
+    user: root  #  para evitar problemas de permisos con el socket Docker
     volumes:
       - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock  # 👈 acceso al Docker daemon
+      - /var/run/docker.sock:/var/run/docker.sock  #  acceso al Docker daemon
 
 volumes:
   jenkins_home:

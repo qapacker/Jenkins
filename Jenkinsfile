@@ -5,19 +5,21 @@ pipeline {
         PYTHON_ENV = 'venv'
         FLASK_APP = 'app.py'
         GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
+        BASE_URL = "http://jenkins-app-1:5000"
+        PYTHONPATH = '/var/jenkins_home/workspace/cp1'
     }
 
     stages {
         stage('Preparar') {
             steps {
-                echo 'Clonando el repositorio y preparando el entorno'
-                sh 'git clone $GIT_REPO .'
+                echo 'Limpiando el workspace y preparando el entorno'
+                deleteDir() // Limpiar el workspace completamente
+                sh "git clone $GIT_REPO ." // Clonar el repositorio
 
                 script {
-                    // Crear entorno virtual
-                    sh 'python3 -m venv $PYTHON_ENV'
-                    // Instalar dependencias
-                    sh ". $PYTHON_ENV/bin/activate && pip install -r requirements.txt"
+                    // Crear entorno virtual e instalar dependencias
+                    sh "python3 -m venv $PYTHON_ENV"
+                    sh "bash -c 'source $PYTHON_ENV/bin/activate && pip install -r requirements.txt'"
                 }
             }
         }
@@ -26,7 +28,8 @@ pipeline {
             steps {
                 echo 'Ejecutando pruebas con pytest'
                 script {
-                    sh ". $PYTHON_ENV/bin/activate && pytest tests/"
+                    // Ejecutar las pruebas directamente sobre la API ya disponible
+                    sh "bash -c 'source $PYTHON_ENV/bin/activate && PYTHONPATH=$PYTHONPATH pytest test/'"
                 }
             }
         }
@@ -35,6 +38,7 @@ pipeline {
             steps {
                 echo 'Desplegando la aplicación'
                 script {
+                    // Si necesitas volver a desplegar la app, asegúrate de que este paso sea necesario
                     sh 'docker build -t myapp .'
                     sh 'docker run -d -p 5000:5000 myapp'
                 }
@@ -51,7 +55,7 @@ pipeline {
         }
         always {
             echo 'Limpiando entorno virtual'
-            sh 'rm -rf $PYTHON_ENV'
+            sh "rm -rf $PYTHON_ENV"
         }
     }
 }

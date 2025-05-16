@@ -5,7 +5,7 @@ pipeline {
         PYTHON_ENV = 'venv'
         FLASK_APP = 'app.py'
         GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
-        BASE_URL = "http://jenkins-app-1:5000"
+        BASE_URL = "http://app-1:5000"
         PYTHONPATH = '/var/jenkins_home/workspace/cp1'
     }
 

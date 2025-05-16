@@ -1,3 +1,4 @@
+
 services:
   app-1:
     container_name: app-1
@@ -10,37 +11,14 @@ services:
   jenkins-master:
     container_name: jenkins-master
     build:
-      context: jenkins/master/.env
+      context: jenkins
       dockerfile: Dockerfile
     ports:
       - "8080:8080"       # UI de Jenkins
       - "50000:50000"     # Puerto de comunicación con agentes
-    user: root            # Evita problemas de permisos con el socket Docker
+    user: root
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-
-  jenkins-agent-1:
-    image: jenkins/inbound-agent:latest
-    container_name: jenkins-agent-1
-    env_file:
-      - jenkins/agent_1/.env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - jenkins-master
-    restart: unless-stopped
-
-  jenkins-agent-2:
-    image: jenkins/inbound-agent:latest
-    container_name: jenkins-agent-2
-    env_file:
-      - jenkins/agent_2/.env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - jenkins-master
-    restart: unless-stopped
-
 volumes:
   jenkins_home:

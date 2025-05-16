@@ -1,0 +1,6 @@
+services:
+  agent-2:
+    image: jenkins/inbound-agent
+    container_name: agent-2
+    env_file:
+      - .env                # Carga variables de entorno desde .env

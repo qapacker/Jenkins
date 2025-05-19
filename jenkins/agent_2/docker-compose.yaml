@@ -1,6 +1,11 @@
 services:
   agent-2:
-    image: jenkins/inbound-agent
+    build:
+      context: .
+      dockerfile: Dockerfile   # tu Dockerfile.agent-2
     container_name: agent-2
+    user: root                # <- así el agente corre como root
     env_file:
-      - .env                # Carga variables de entorno desde .env
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

@@ -3,45 +3,79 @@ pipeline {
 
     environment {
         PYTHON_ENV = 'venv'
-        FLASK_APP = 'app.py'
-        GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
-        BASE_URL = "http://localhost:5000"
-        PYTHONPATH = '/var/jenkins_home/workspace/cp1'
+        GIT_REPO   = 'https://github.com/qapacker/Jenkins.git'
     }
 
     stages {
         stage('Preparar') {
-            agent none
+            agent any
             steps {
-                echo 'Preparando entorno'
-                sh 'rm -rf *'
-                sh "git clone $GIT_REPO ."
-                sh "python3 -m venv $PYTHON_ENV"
-                sh "bash -c 'source $PYTHON_ENV/bin/activate && pip install -r requirements.txt'"
+                echo '🔄 Limpiando workspace'
+                sh 'find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
+                echo '🔗 Clonando repositorio'
+                sh "git clone ${GIT_REPO} ."
                 stash includes: '**', name: 'source_code'
             }
         }
 
-        stage('Test y Desplegar') {
+        stage('Test') {
             agent { label 'agent-1' }
             steps {
-                echo 'Recuperando código'
+                echo '📥 Recuperando código'
                 unstash 'source_code'
 
-                echo 'Ejecutando tests'
-                sh "bash -c 'source $PYTHON_ENV/bin/activate && PYTHONPATH=$PYTHONPATH pytest test/'"
+                echo '🛠️ Configurando entorno Python'
+                sh '''
+                  bash -lc "
+                    python3 -m venv ${PYTHON_ENV} &&
+                    source ${PYTHON_ENV}/bin/activate &&
+                    pip install --upgrade pip &&
+                    pip install --no-cache-dir -r requirements.txt
+                  "
+                '''
 
-                echo 'Desplegando'
+                echo '🚀 Arrancando API Flask en background'
+                sh '''
+                  bash -lc "
+                    source ${PYTHON_ENV}/bin/activate &&
+                    nohup python app/api.py > flask.log 2>&1 &
+                    sleep 3
+                  "
+                '''
+
+                echo '✅ Ejecutando pytest contra localhost:5000'
+                sh '''
+                  bash -lc "
+                    source ${PYTHON_ENV}/bin/activate &&
+                    export PYTHONPATH=$(pwd) &&
+                    export BASE_URL=http://localhost:5000 &&
+                    pytest test/
+                  "
+                '''
+            }
+        }
+
+        stage('Desplegar') {
+            agent { label 'agent-2' }
+            steps {
+                echo '📥 Recuperando código'
+                unstash 'source_code'
+
+                echo '🐳 Construyendo imagen Docker'
                 sh 'docker build -t myapp .'
-                sh 'docker run -d -p 6000:6000 myapp'
+
+                echo '🚀 Lanzando contenedor'
+                sh 'docker run -d -p 7000:5000 myapp'
             }
         }
     }
 
     post {
-        always {
-            echo 'Limpieza final'
-            sh "rm -rf $PYTHON_ENV"
+        success {
+            echo '✅ Pipeline exitoso'
+        }
+        failure {
+            echo '❌ Pipeline fallido'
         }
     }
 }

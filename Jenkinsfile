@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'master' }
 
     environment {
         PYTHON_ENV = 'venv'
@@ -39,7 +39,7 @@ pipeline {
                 echo 'Desplegando la aplicación'
                 script {
                     sh 'docker build -t myapp .'
-                    sh 'docker run -d -p 6000:6000 myapp'
+                    sh 'docker run -d -p 6000:5000 myapp'
                 }
             }
         }

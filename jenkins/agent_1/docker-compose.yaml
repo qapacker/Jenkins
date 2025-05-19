@@ -1,6 +1,8 @@
 services:
   agent-1:
-    image: jenkins/inbound-agent
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: agent-1
     env_file:
-      - .env                # Carga variables de entorno desde .env
+      - .env

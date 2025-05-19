@@ -12,7 +12,7 @@ services:
     container_name: jenkins-master
     build:
       context: jenkins
-      dockerfile: Dockerfile
+      dockerfile: master/Dockerfile
     ports:
       - "8080:8080"       # UI de Jenkins
       - "50000:50000"     # Puerto de comunicación con agentes

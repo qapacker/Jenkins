@@ -1,9 +1,9 @@
 services:
-  agent-2:
+  agent-3:
     build:
       context: .
-      dockerfile: Dockerfile   # tu Dockerfile.agent-2
-    container_name: agent-2
+      dockerfile: Dockerfile
+    container_name: agent-3
     user: root
     env_file:
       - .env

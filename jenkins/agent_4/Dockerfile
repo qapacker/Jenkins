@@ -8,12 +8,14 @@ RUN apt-get update && \
     git \
     python3 \
     python3-pip \
-    python3-venv && \
-    python3 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install flask pytest && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    python3-venv \
+    curl \
+    unzip \
+    && python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --upgrade pip \
+    && /opt/venv/bin/pip install flake8 bandit locust \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV PATH="/opt/venv/bin:$PATH"
 

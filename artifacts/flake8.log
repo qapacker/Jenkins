@@ -1,0 +1,35 @@
+./app/api.py:19:80: E501 line too long (81 > 79 characters)
+./app/api.py:20:80: E501 line too long (83 > 79 characters)
+./app/api.py:28:80: E501 line too long (81 > 79 characters)
+./app/api.py:29:80: E501 line too long (89 > 79 characters)
+./app/api.py:37:80: E501 line too long (81 > 79 characters)
+./app/api.py:38:80: E501 line too long (88 > 79 characters)
+./app/api.py:46:80: E501 line too long (81 > 79 characters)
+./app/api.py:55:1: E305 expected 2 blank lines after class or function definition, found 1
+./app/calc.py:22:18: E271 multiple spaces after keyword
+./app/calc.py:22:80: E501 line too long (110 > 79 characters)
+./app/calc.py:31:46: E271 multiple spaces after keyword
+./app/calc.py:31:80: E501 line too long (125 > 79 characters)
+./test/locust/locustfile.py:4:1: E302 expected 2 blank lines, found 1
+./test/locust/locustfile.py:31:80: E501 line too long (93 > 79 characters)
+./test/locust/locustfile.py:32:49: W292 no newline at end of file
+./test/rest/api_test.py:12:1: E302 expected 2 blank lines, found 1
+./test/rest/api_test.py:21:80: E501 line too long (94 > 79 characters)
+./test/rest/api_test.py:27:80: E501 line too long (96 > 79 characters)
+./test/rest/api_test.py:33:80: E501 line too long (94 > 79 characters)
+./test/rest/api_test.py:39:80: E501 line too long (94 > 79 characters)
+./test/rest/api_test.py:42:1: E305 expected 2 blank lines after class or function definition, found 1
+./test/unit/calc_test.py:22:49: W291 trailing whitespace
+./test/unit/calc_test.py:23:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:28:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:37:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:49:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:56:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:64:1: W293 blank line contains whitespace
+./test/unit/calc_test.py:65:1: E305 expected 2 blank lines after class or function definition, found 1
+./test/unit/util_test.py:14:80: E501 line too long (83 > 79 characters)
+./test/unit/util_test.py:15:80: E501 line too long (83 > 79 characters)
+./test/unit/util_test.py:16:80: E501 line too long (84 > 79 characters)
+./test/unit/util_test.py:17:80: E501 line too long (85 > 79 characters)
+./test/unit/util_test.py:26:1: E305 expected 2 blank lines after class or function definition, found 1
+./test/unit/util_test.py:27:20: W292 no newline at end of file

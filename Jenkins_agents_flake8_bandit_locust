@@ -1,0 +1,131 @@
+pipeline {
+    agent none
+
+    environment {
+        GIT_REPO = 'https://github.com/qapacker/Jenkins.git'
+    }
+
+    stages {
+        stage('Preparar') {
+            agent any
+            steps {
+                echo '🔄 Limpiando workspace'
+                sh 'find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +'
+                echo '🔗 Clonando repositorio'
+                sh "git clone ${GIT_REPO} ."
+                stash includes: '**', name: 'source_code'
+            }
+        }
+
+        stage('Análisis Estático') {
+            agent { label 'agent-3' }
+            steps {
+                echo '📥 Recuperando código'
+                unstash 'source_code'
+
+                echo '🔍 Ejecutando flake8'
+                script {
+                    sh 'flake8 . --exit-zero > flake8.log'
+                    def count = sh(script: 'wc -l < flake8.log', returnStdout: true).trim().toInteger()
+                    echo "📝 flake8 findings: ${count}"
+                    if (count >= 10) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "🔴 UNHEALTHY por flake8"
+                    } else if (count >= 8) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "🟠 UNSTABLE por flake8"
+                    }
+                }
+
+                echo '🛡️ Ejecutando bandit'
+                script {
+                    def banditStatus = sh(script: 'bandit -r . -f json -o bandit.json', returnStatus: true)
+                    def findings = 0
+                    if (fileExists('bandit.json')) {
+                        findings = sh(script: '''
+                          python3 -c "import json; print(len(json.load(open('bandit.json'))['results']))"
+                        ''', returnStdout: true).trim().toInteger()
+                    }
+                    echo "📝 bandit findings: ${findings}"
+                    if (findings >= 4) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "🔴 UNHEALTHY por bandit"
+                    } else if (findings >= 2) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "🟠 UNSTABLE por bandit"
+                    }
+                }
+
+                archiveArtifacts artifacts: 'flake8.log, bandit.json', allowEmptyArchive: true
+            }
+        }
+
+        stage('Test') {
+            agent { label 'agent-1' }
+            steps {
+                echo '📥 Recuperando código'
+                unstash 'source_code'
+
+                echo '🚀 Levantando API Flask para pruebas'
+                sh '''
+                  nohup python3 app/api.py > flask.log 2>&1 &
+                  sleep 3
+                '''
+
+                echo '✅ Ejecutando pytest contra localhost:5000'
+                sh '''
+                  export PYTHONPATH=$(pwd)
+                  export BASE_URL=http://localhost:5000
+                  /opt/venv/bin/pytest test/
+                '''
+            }
+        }
+
+        stage('Desplegar') {
+            agent { label 'agent-2' }
+            steps {
+                echo '📥 Recuperando código'
+                unstash 'source_code'
+
+                echo '🐳 Construyendo imagen Docker'
+                sh 'docker build -t myapp .'
+
+                echo '🚀 Lanzando contenedor'
+                sh 'docker run -d -p 7000:5000 myapp'
+            }
+        }
+
+        stage('Performance') {
+            agent { label 'agent-4' }
+            steps {
+                echo '📥 Recuperando código'
+                unstash 'source_code'
+
+                echo '🚀 Levantando API Flask para pruebas de carga'
+                sh '''
+                  nohup python3 app/api.py > flask.log 2>&1 &
+                  sleep 3
+                '''
+
+                echo '📊 Ejecutando test de carga con Locust'
+                sh '''
+                  locust -f test/locust/locustfile.py --headless --host=http://localhost:5000 -u 5 -r 5 -t 1m --csv=locust_result
+                '''
+
+                archiveArtifacts artifacts: 'locust_result*', allowEmptyArchive: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Pipeline exitoso'
+        }
+        failure {
+            echo '❌ Pipeline fallido'
+        }
+        unstable {
+            echo '⚠️ Pipeline inestable por hallazgos en flake8 o bandit'
+        }
+    }
+}

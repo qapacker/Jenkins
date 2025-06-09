@@ -11,7 +11,7 @@ RUN apt-get update && \
     python3-venv && \
     python3 -m venv /opt/venv && \
     /opt/venv/bin/pip install --upgrade pip && \
-    /opt/venv/bin/pip install flask pytest && \
+    /opt/venv/bin/pip install flask pytest flake8 bandit coverage locust && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
